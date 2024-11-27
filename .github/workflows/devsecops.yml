@@ -100,7 +100,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: zap-results
-          path: *.html
+          path: '**/*.html'
 
   deploy:
     name: Deploy OWASP Juice Shop
