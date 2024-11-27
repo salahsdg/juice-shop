@@ -70,7 +70,7 @@ jobs:
           npm install
 
       - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/node@v0.2.0
+        uses: snyk/actions/node@master
         with:
           args: monitor
         env:
