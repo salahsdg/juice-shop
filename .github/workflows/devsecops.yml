@@ -26,44 +26,43 @@ jobs:
           docker run -d -p 3000:3000 --name juice-shop bkimminich/juice-shop
 
         
-  sast-codeql:
+codeql-analysis:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Run CodeQL Analysis
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: javascript  # Specify the languages used in your project
+
+      - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
-        with:
-          languages: javascript
 
-  sca-snyk:
+
+  security:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Run Snyk Dependency Scan
-        uses: snyk/actions/node@v1
-        with:
-          args: test
+      - uses: actions/checkout@master
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
-  dast-owasp-zap:
+  zap-scan:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy Juice Shop for Testing
-        run: docker run -d -p 3000:3000 --name juice-shop bkimminich/juice-shop
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-      - name: OWASP ZAP Scan
-        uses: zaproxy/action-full-scan@v0.6.0
+      - name: Run OWASP ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.3.1
         with:
           target: 'http://localhost:3000'
-
-      - name: Cleanup
-        run: docker stop juice-shop && docker rm juice-shop
-
+          format: 'html'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   vulnerability-reporting:
     runs-on: ubuntu-latest
     steps:
